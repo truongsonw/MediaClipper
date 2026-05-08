@@ -7,13 +7,13 @@ block_cipher = None
 project_root = Path(SPECPATH).parent.parent
 
 a = Analysis(
-    ["src/mediaclipper/main.py"],
+    [str(project_root / "src" / "mediaclipper" / "main.py")],
     pathex=[str(project_root / "src")],
     binaries=[
         # Bundle external tools
-        ("tools/windows/ffmpeg.exe", "tools/windows"),
-        ("tools/windows/ffprobe.exe", "tools/windows"),
-        ("tools/windows/yt-dlp.exe", "tools/windows"),
+        (str(project_root / "tools" / "windows" / "ffmpeg.exe"), "tools/windows"),
+        (str(project_root / "tools" / "windows" / "ffprobe.exe"), "tools/windows"),
+        (str(project_root / "tools" / "windows" / "yt-dlp.exe"), "tools/windows"),
     ],
     datas=[],
     hiddenimports=[
