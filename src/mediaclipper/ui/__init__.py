@@ -1,0 +1,1 @@
+"""MediaClipper UI layer."""

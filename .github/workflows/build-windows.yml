@@ -1,0 +1,77 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: x64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: pip-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pyinstaller pyside6 yt-dlp
+
+      - name: Download tools
+        shell: pwsh
+        run: |
+          mkdir -p tools/windows
+          if (!(Test-Path tools/windows/ffmpeg.exe)) {
+            Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
+            Expand-Archive ffmpeg.zip -DestinationPath tools/ext
+            Copy-Item tools/ext/*/ffmpeg.exe tools/windows/
+            Copy-Item tools/ext/*/ffprobe.exe tools/windows/
+            Remove-Item ffmpeg.zip -Force
+            Remove-Item tools/ext -Recurse -Force
+          }
+          if (!(Test-Path tools/windows/yt-dlp.exe)) {
+            Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile tools/windows/yt-dlp.exe
+          }
+
+      - name: Build with PyInstaller
+        run: |
+          $ErrorActionPreference = "Stop"
+          pyinstaller packaging/pyinstaller/mediaclipper.spec --clean --noconfirm
+
+      - name: Create artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaClipper-${{ matrix.arch }}
+          path: dist/MediaClipper/
+          retention-days: 14
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/MediaClipper/**
+          body: "MediaClipper ${{ github.ref_name }} for Windows ${{ matrix.arch }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
