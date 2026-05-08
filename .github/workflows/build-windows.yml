@@ -42,7 +42,7 @@ jobs:
       - name: Download tools
         shell: pwsh
         run: |
-          mkdir -p tools/windows
+          New-Item -ItemType Directory -Path tools/windows -Force | Out-Null
           Write-Host "Downloading FFmpeg..."
           Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
           Expand-Archive ffmpeg.zip -DestinationPath tools/ext
