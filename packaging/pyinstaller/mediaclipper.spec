@@ -1,9 +1,6 @@
 """PyInstaller spec file for MediaClipper."""
 
-import os
-import sys
 from pathlib import Path
-from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
@@ -55,9 +52,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=str(project_root / "packaging" / "icon.ico")
-    if (project_root / "packaging" / "icon.ico").exists()
-    else None,
+    icon=None,
 )
 
 coll = COLLECT(

@@ -30,7 +30,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\pip\Cache
-          key: pip-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+          key: pip-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
           restore-keys: |
             pip-${{ runner.os }}-
 
@@ -43,17 +43,16 @@ jobs:
         shell: pwsh
         run: |
           mkdir -p tools/windows
-          if (!(Test-Path tools/windows/ffmpeg.exe)) {
-            Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
-            Expand-Archive ffmpeg.zip -DestinationPath tools/ext
-            Copy-Item tools/ext/*/ffmpeg.exe tools/windows/
-            Copy-Item tools/ext/*/ffprobe.exe tools/windows/
-            Remove-Item ffmpeg.zip -Force
-            Remove-Item tools/ext -Recurse -Force
-          }
-          if (!(Test-Path tools/windows/yt-dlp.exe)) {
-            Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile tools/windows/yt-dlp.exe
-          }
+          Write-Host "Downloading FFmpeg..."
+          Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath tools/ext
+          Copy-Item tools/ext/*/ffmpeg.exe tools/windows/
+          Copy-Item tools/ext/*/ffprobe.exe tools/windows/
+          Remove-Item ffmpeg.zip -Force
+          Remove-Item tools/ext -Recurse -Force
+          Write-Host "Downloading yt-dlp..."
+          Invoke-WebRequest -Uri "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -OutFile tools/windows/yt-dlp.exe
+          Write-Host "Done."
 
       - name: Build with PyInstaller
         run: |
