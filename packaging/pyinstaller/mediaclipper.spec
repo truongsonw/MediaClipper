@@ -6,15 +6,16 @@ block_cipher = None
 
 project_root = Path(SPECPATH).parent.parent
 
+_binaries = []
+for _tool in ["ffmpeg.exe", "ffprobe.exe", "yt-dlp.exe"]:
+    _src = project_root / "tools" / "windows" / _tool
+    if _src.exists():
+        _binaries.append((str(_src), "tools/windows"))
+
 a = Analysis(
     [str(project_root / "src" / "mediaclipper" / "main.py")],
     pathex=[str(project_root / "src")],
-    binaries=[
-        # Bundle external tools
-        (str(project_root / "tools" / "windows" / "ffmpeg.exe"), "tools/windows"),
-        (str(project_root / "tools" / "windows" / "ffprobe.exe"), "tools/windows"),
-        (str(project_root / "tools" / "windows" / "yt-dlp.exe"), "tools/windows"),
-    ],
+    binaries=_binaries,
     datas=[],
     hiddenimports=[
         "PySide6.QtCore",
